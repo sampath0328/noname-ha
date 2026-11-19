@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expense Tracker</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: Arial, sans-serif;
+  background: #f1f5f9; color: #172033;
+}
+header {
+  background: #172554; color: white;
+  padding: 24px; text-align: center;
+}
+main { max-width: 850px; margin: 30px auto; padding: 0 16px; }
+.cards { display: flex; gap: 16px; flex-wrap: wrap; }
+.card {
+  flex: 1; min-width: 180px; background: white;
+  padding: 22px; border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+}
+.card h3 { margin: 0 0 12px; color: #64748b; font-size: 14px; }
+.card strong { font-size: 26px; }
+.panel {
+  background: white; padding: 22px; margin-top: 22px;
+  border-radius: 12px; box-shadow: 0 2px 8px #0001;
+}
+form { display: flex; flex-wrap: wrap; gap: 10px; }
+input, button {
+  padding: 12px; border: 1px solid #cbd5e1;
+  border-radius: 7px; font-size: 15px;
+}
+input { flex: 1; min-width: 140px; }
+button {
+  background: #2563eb; color: white; border: 0;
+  cursor: pointer;
+}
+button.delete { background: #dc2626; padding: 7px 11px; }
+table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+th { color: #64748b; }
+.empty { color: #64748b; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Expense Tracker</h1>
+  <p>Track your daily spending</p>
+</header>
+<main>
+  <section class="cards">
+    <div class="card"><h3>Total Expenses</h3><strong id="total">₹0.00</strong></div>
+    <div class="card"><h3>Number of Expenses</h3><strong id="count">0</strong></div>
+  </section>
+
+  <section class="panel">
+    <h2>Add an Expense</h2>
+    <form id="expenseForm">
+      <input id="description" placeholder="Expense description" required>
+      <input id="amount" type="number" min="0.01" step="0.01" placeholder="Amount (₹)" required>
+      <input id="date" type="date" required>
+      <button type="submit">Add Expense</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Expense History</h2>
+    <table>
+      <thead><tr><th>Description</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+      <tbody id="expenseList"></tbody>
+    </table>
+  </section>
+</main>
+<script>
+const storageKey = "simple-expense-tracker";
+let expenses = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+const form = document.getElementById("expenseForm");
+const dateInput = document.getElementById("date");
+dateInput.value = new Date().toISOString().slice(0, 10);
+
+function render() {
+  const list = document.getElementById("expenseList");
+  list.replaceChildren();
+
+  document.getElementById("total").textContent =
+    "₹" + expenses.reduce((sum, item) => sum + item.amount, 0).toFixed(2);
+  document.getElementById("count").textContent = expenses.length;
+
+  if (!expenses.length) {
+    const row = list.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 4;
+    cell.className = "empty";
+    cell.textContent = "No expenses yet. Add your first expense above.";
+    return;
+  }
+
+  expenses.forEach((item, index) => {
+    const row = list.insertRow();
+    row.insertCell().textContent = item.description;
+    row.insertCell().textContent = "₹" + item.amount.toFixed(2);
+    row.insertCell().textContent = item.date;
+    const action = row.insertCell();
+    const button = document.createElement("button");
+    button.className = "delete";
+    button.textContent = "Delete";
+    button.addEventListener("click", () => {
+      expenses.splice(index, 1);
+      save();
+    });
+    action.appendChild(button);
+  });
+}
+
+function save() {
+  localStorage.setItem(storageKey, JSON.stringify(expenses));
+  render();
+}
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+  const description = document.getElementById("description").value.trim();
+  const amount = Number(document.getElementById("amount").value);
+  const date = dateInput.value;
+
+  if (!description || !Number.isFinite(amount) || amount <= 0 || !date) return;
+
+  expenses.push({ description, amount, date });
+  save();
+  form.reset();
+  dateInput.value = new Date().toISOString().slice(0, 10);
+});
+
+render();
+</script>
+</body>
+</html>
