@@ -1,0 +1,38 @@
+name: Deploy Expense Tracker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: expense-tracker-deployment
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to DB2
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate HTML
+        run: |
+          test -s index.html
+          grep -q '<html' index.html
+
+      - name: Deploy website
+        run: |
+          install -m 644 index.html /var/www/html/index.html.tmp
+          mv /var/www/html/index.html.tmp /var/www/html/index.html
+
+      - name: Verify deployment
+        run: |
+          curl --fail --silent http://127.0.0.1/ > /dev/null
+          echo "Expense Tracker deployment successful!"
