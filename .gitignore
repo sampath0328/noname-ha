@@ -4,3 +4,4 @@ __pycache__/
 *.py[cod]
 .venv/
 environment (2).json
+akamai/environment.json
