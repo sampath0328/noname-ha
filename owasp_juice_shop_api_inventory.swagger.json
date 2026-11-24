@@ -1,0 +1,1592 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OWASP Juice Shop API Inventory (Demo)",
+    "version": "1.0.0",
+    "description": "OpenAPI inventory for common OWASP Juice Shop REST API routes, prepared for authorized lab discovery and security testing. Juice Shop's exact routes and response schemas can vary by version. This document is a best-effort importable starting point, not an official upstream specification and not a server implementation. Run Juice Shop in an isolated environment you control; do not actively test public demo instances without permission."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Juice Shop instance (default Docker port); change to your authorized lab URL"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Products"
+    },
+    {
+      "name": "Basket"
+    },
+    {
+      "name": "Feedback and Complaints"
+    },
+    {
+      "name": "Orders"
+    },
+    {
+      "name": "Addresses and Cards"
+    },
+    {
+      "name": "Challenges and Configuration"
+    },
+    {
+      "name": "Other"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Use a token from your own Juice Shop lab account."
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "demo@example.test"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "DemoPassword123!"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "demo@example.test"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "DemoPassword123!"
+          },
+          "passwordRepeat": {
+            "type": "string",
+            "format": "password",
+            "example": "DemoPassword123!"
+          },
+          "securityQuestion": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 1
+              },
+              "question": {
+                "type": "string",
+                "example": "Your favorite color?"
+              }
+            }
+          },
+          "securityAnswer": {
+            "type": "string",
+            "example": "blue"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Apple Juice"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "example": 1.99
+          },
+          "image": {
+            "type": "string"
+          }
+        }
+      },
+      "Feedback": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "example": "Good product"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/rest/user/login": {
+      "post": {
+        "summary": "Log in",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "post_rest_user_login",
+        "description": "Authenticates a lab user and typically returns a token.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/user/whoami": {
+      "get": {
+        "summary": "Get current user",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "get_rest_user_whoami",
+        "description": "Returns the current session identity.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/user/logout": {
+      "get": {
+        "summary": "Log out",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "get_rest_user_logout",
+        "description": "Logs out the current session.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Users": {
+      "post": {
+        "summary": "Register user",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "post_api_Users",
+        "description": "Create a user in the local lab.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List users",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "get_api_Users",
+        "description": "Generated REST endpoint; access may depend on version and authorization.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Users/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "get_api_Users_id",
+        "description": "Read a user record by ID; use only lab accounts.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user by ID",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "put_api_Users_id",
+        "description": "Update a user record; verify accepted fields in your version.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Products": {
+      "get": {
+        "summary": "List products",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "get_api_Products",
+        "description": "Returns product records.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional filter/query supported by the generated endpoint."
+          }
+        ]
+      }
+    },
+    "/api/Products/{id}": {
+      "get": {
+        "summary": "Get product by ID",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "get_api_Products_id",
+        "description": "Returns a product record.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update product by ID",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "put_api_Products_id",
+        "description": "Generated endpoint; test only in your isolated lab.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/products/search": {
+      "get": {
+        "summary": "Search products",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "get_rest_products_search",
+        "description": "Search the product catalog.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          }
+        ]
+      }
+    },
+    "/api/Feedbacks": {
+      "get": {
+        "summary": "List feedback",
+        "tags": [
+          "Feedback and Complaints"
+        ],
+        "operationId": "get_api_Feedbacks",
+        "description": "List feedback records if exposed by this version.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Submit feedback",
+        "tags": [
+          "Feedback and Complaints"
+        ],
+        "operationId": "post_api_Feedbacks",
+        "description": "Submit product feedback.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Feedback"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Feedbacks/{id}": {
+      "get": {
+        "summary": "Get feedback by ID",
+        "tags": [
+          "Feedback and Complaints"
+        ],
+        "operationId": "get_api_Feedbacks_id",
+        "description": "Read feedback by identifier.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Complaints": {
+      "post": {
+        "summary": "Submit complaint",
+        "tags": [
+          "Feedback and Complaints"
+        ],
+        "operationId": "post_api_Complaints",
+        "description": "Create a complaint record.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Demo complaint"
+                  },
+                  "file": {
+                    "type": "string",
+                    "description": "Optional file reference depending on version"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/BasketItems": {
+      "get": {
+        "summary": "List basket items",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "get_api_BasketItems",
+        "description": "Generated basket-item endpoint; behavior can depend on session.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add basket item",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "post_api_BasketItems",
+        "description": "Add a product to a basket.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ProductId": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "BasketId": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/BasketItems/{id}": {
+      "put": {
+        "summary": "Update basket item",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "put_api_BasketItems_id",
+        "description": "Update a basket item.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete basket item",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "delete_api_BasketItems_id",
+        "description": "Delete a basket item.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/basket/{id}": {
+      "get": {
+        "summary": "Get basket",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "get_rest_basket_id",
+        "description": "Returns basket contents for the supplied basket identifier.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add item to basket (legacy route)",
+        "tags": [
+          "Basket"
+        ],
+        "operationId": "post_rest_basket_id",
+        "description": "Version-dependent route; confirm against your local instance.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/order-history": {
+      "get": {
+        "summary": "Get order history",
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "get_rest_order_history",
+        "description": "Returns order history for the current user.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/track-order/{id}": {
+      "get": {
+        "summary": "Track order",
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "get_rest_track_order_id",
+        "description": "Track an order by its identifier.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Use a fixture identifier from your own lab."
+          }
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Orders": {
+      "get": {
+        "summary": "List orders",
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "get_api_Orders",
+        "description": "Generated orders endpoint; confirm authorization in your version.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Addresses": {
+      "get": {
+        "summary": "List addresses",
+        "tags": [
+          "Addresses and Cards"
+        ],
+        "operationId": "get_api_Addresses",
+        "description": "Generated address endpoint; actual model route spelling can vary by version.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create address",
+        "tags": [
+          "Addresses and Cards"
+        ],
+        "operationId": "post_api_Addresses",
+        "description": "Create an address for a lab account.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Cards": {
+      "get": {
+        "summary": "List payment cards",
+        "tags": [
+          "Addresses and Cards"
+        ],
+        "operationId": "get_api_Cards",
+        "description": "Generated card endpoint; use synthetic data only.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create payment card",
+        "tags": [
+          "Addresses and Cards"
+        ],
+        "operationId": "post_api_Cards",
+        "description": "Create a synthetic payment card record in the lab.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/api/Challenges": {
+      "get": {
+        "summary": "List security challenges",
+        "tags": [
+          "Challenges and Configuration"
+        ],
+        "operationId": "get_api_Challenges",
+        "description": "Returns challenge metadata and state.",
+        "responses": {
+          "200": {
+            "description": "Challenge list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/admin/application-configuration": {
+      "get": {
+        "summary": "Get application configuration",
+        "tags": [
+          "Challenges and Configuration"
+        ],
+        "operationId": "get_rest_admin_application_configuration",
+        "description": "Version-dependent configuration endpoint; use only in your lab.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ]
+      }
+    },
+    "/rest/captcha": {
+      "get": {
+        "summary": "Get CAPTCHA challenge",
+        "tags": [
+          "Other"
+        ],
+        "operationId": "get_rest_captcha",
+        "description": "Returns CAPTCHA challenge data where enabled.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        }
+      }
+    },
+    "/rest/memories": {
+      "get": {
+        "summary": "Get application memories",
+        "tags": [
+          "Other"
+        ],
+        "operationId": "get_rest_memories",
+        "description": "Version-dependent route; verify availability against your instance.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        }
+      }
+    },
+    "/rest/saveLoginIp": {
+      "post": {
+        "summary": "Save login IP metadata",
+        "tags": [
+          "Other"
+        ],
+        "operationId": "post_rest_saveLoginIp",
+        "description": "Version-dependent route; use only for local test traffic.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required where applicable"
+          },
+          "404": {
+            "description": "Route or resource not found"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
